@@ -17,6 +17,7 @@ const viewModel = {
 	query: ko.observable(''),
 	menuPane: ko.observable(null),
 	locations: ko.observableArray(),
+	windowKo: ko.observable(window.innerWidth),
 
 	toggleMenu: () => {
 		if (viewModel.menuPane() === null) {
@@ -41,16 +42,47 @@ const viewModel = {
 // Copy the value of locs to observableArray
 locs.map(l => viewModel.locations().push(l));
 
+// Check the viewport size to toggle menu on mobile
+if (viewModel.windowKo() <= 500) {
+	viewModel.toggleMenu()
+}
+
+// Listen to the search input query and show the results
 viewModel.searchList = ko.computed(() => {
 	let q = viewModel.query();
 
 	if (!q) {
+		if (document.readyState === "complete") {
+			markers.map(m => { m.setMap(map); })
+		}
 		return viewModel.locations();
 	} else {
 		return ko.utils.arrayFilter(viewModel.locations(), item => {
 			return item.title.toLowerCase().indexOf(q) >= 0;
-		})
+		});
 	}
+});
+
+viewModel.filterMarkers = ko.computed(() => {
+	var m = viewModel.searchList();
+
+	if (!m) {
+		return 
+	} else {
+		if (document.readyState === "complete") {
+			return m.filter(item => {
+				console.log(item)
+				return markers[item.id].setMap(map);
+			});
+		}
+	}
+});
+
+// Listen for resize window to enable menu button
+window.addEventListener('resize', () => {
+	if (window.innerWidth <= 500) {
+		viewModel.menuPane("menu-close");
+	} else { return }
 });
 
 // GOOGLE MAPS API

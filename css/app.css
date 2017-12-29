@@ -129,8 +129,3 @@ html, body {
 	height: 100vh;
 	width: 100vw;
 }
-
-/* MEDIA QUERY - MOBILE BKPS */
-@media screen and (max-width: 500px) {
-	#menu { transform: translateX(-100vw); }
-}
