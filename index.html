@@ -8,16 +8,27 @@
 </head>
 <body>
 	<div id="content">
-		<div id="menu">
+		<div id="menu-icon-fb">
+			<img src="menu.svg" alt="Menu icon" data-bind="click: toggleMenu">
+		</div>
+		<div id="menu" data-bind="attr: {class: menuPane}">
 			<div id="header">
-				<div id="top-header"></div>
+				<div id="top-header">
+					<img src="menu.svg" alt="Menu icon" data-bind="click: toggleMenu">
+				</div>
 				<div id="bottom-header">
-					<div id="search"></div>
-					<div id="filter"></div>
+					<div id="search">
+						<input type="text" data-bind="value: query, valueUpdate: 'keyup'">
+					</div>
+					<div id="filter">
+						<button>Filter</button>
+					</div>
 				</div>
 			</div>
 			<div id="listing">
-				<ul id="list-items"></ul>
+				<ul id="list-items" data-bind="foreach: searchList">
+					<li class="list-text" data-bind="text: title, click: function(){$parent.showMarkerWindow(id, location)}"></li>
+				</ul>
 			</div>
 		</div>
 		<div id="map"></div>
