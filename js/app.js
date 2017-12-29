@@ -70,8 +70,10 @@ viewModel.filterMarkers = ko.computed(() => {
 		return 
 	} else {
 		if (document.readyState === "complete") {
+			for (let x = 0; x < markers.length; x++) {
+				markers[x].setMap(null);
+			}
 			return m.filter(item => {
-				console.log(item)
 				return markers[item.id].setMap(map);
 			});
 		}
