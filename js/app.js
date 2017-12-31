@@ -27,15 +27,22 @@ const viewModel = {
 		}
 	},
 	setCenterMap: loc => { map.setCenter(loc); },
-	showInfoWindow: (id) => {
+	showInfoWindow: id => {
 		infoWindow.map(i => {
 			i.setMap(null);
 		});
 		infoWindow[id].open(map, markers[id]);
 	},
+	animateMarker: id => {
+		markers[id].setAnimation(google.maps.Animation.BOUNCE);
+		window.setTimeout(() => {
+			markers[id].setAnimation(null);
+		}, 1400)
+	},
 	showMarkerWindow: (id, loc) => {
 		viewModel.setCenterMap(loc);
 		viewModel.showInfoWindow(id);
+		viewModel.animateMarker(id);
 	}
 };
 
@@ -67,7 +74,7 @@ viewModel.filterMarkers = ko.computed(() => {
 	var m = viewModel.searchList();
 
 	if (!m) {
-		return 
+		return
 	} else {
 		if (document.readyState === "complete") {
 			for (let x = 0; x < markers.length; x++) {
@@ -89,12 +96,13 @@ window.addEventListener('resize', () => {
 
 // GOOGLE MAPS API
 var map,
+		geocoder,
 		markers = [],
 		infoWindow = [];
 
 // Initialize map on load
 function initMap() {
-
+	geocoder = new google.maps.Geocoder();
 	map = new google.maps.Map(document.getElementById('map'), {
 		center: viewModel.locations()[0].location,
 		zoom: 5,
@@ -110,11 +118,6 @@ function initMap() {
       map.setCenter(center);
   });
 
-	marker = new google.maps.Marker({
-		position: viewModel.locations()[0].location,
-		title: 'Hello World!'
-	});
-
 	// Set initial MARKERS to the map
 	// use marker.setMap(map) to add one marker
 	viewModel.locations().map(item => {
@@ -122,6 +125,7 @@ function initMap() {
 			id: item.id,
 			position: item.location,
 			title: item.title,
+			animation: google.maps.Animation.DROP
 		});
 
 		let iW = new google.maps.InfoWindow({
