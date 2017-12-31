@@ -5,11 +5,11 @@
 
 // APPLICATION MVVM HANDLERS
 const locs = [
-		{id: 0, title: "France", location: {lat: 46.727106, lng: 2.465734}, info: "<div>Some really nice text on the info window</div>"},
-		{id: 1, title: "Amsterdam", location: {lat: 52.358717, lng: 4.868406}, info: "<div>Some really nice text on the info window</div>"},
-		{id: 2, title: "Prage", location: {lat: 50.071045, lng: 14.430600}, info: "<div>Some really nice text on the info window</div>"},
-		{id: 3, title: "Dublin", location: {lat: 53.324597, lng: -6.194791}, info: "<div>Some really nice text on the info window</div>"},
-		{id: 4, title: "Berlin", location: {lat: 52.528739, lng: 13.454198}, info: "<div>Some really nice text on the info window</div>"}
+		{id: 0, title: "Hardware Société", placeid: "ChIJpZjaLl1u5kcR0yN4kIoECqw", location: {lat: 48.8868764, lng: 2.344576800000027}, address: null, info: "<div>Some really nice text on the info window</div>"},
+		{id: 1, title: "La Caféothèque", placeid: "ChIJUZd-NP1x5kcRQhl91RYHxRs", location: {lat: null, lng: null}, address: null, info: "<div>Some really nice text on the info window</div>"},
+		{id: 2, title: "Fondation Café", placeid: "ChIJEfw8-gVu5kcRCoObsIY7C1I", location: {lat: null, lng: null}, address: null, info: "<div>Some really nice text on the info window</div>"},
+		{id: 3, title: "Bagelstein", placeid: "ChIJswHuekdu5kcR6xgWWkc5aPc", location: {lat: null, lng: null}, address: null, info: "<div>Some really nice text on the info window</div>"},
+		{id: 4, title: "CRAFT", placeid: "ChIJLeUyggtu5kcRNUgCe7GhauQ", location: {lat: null, lng: null}, address: null, info: "<div>Some really nice text on the info window</div>"}
 ]
 
 const viewModel = {
@@ -103,13 +103,6 @@ var map,
 // Initialize map on load
 function initMap() {
 	geocoder = new google.maps.Geocoder();
-	map = new google.maps.Map(document.getElementById('map'), {
-		center: viewModel.locations()[0].location,
-		zoom: 5,
-		mapTypeControlOptions: {
-			position: google.maps.ControlPosition.LEFT_BOTTOM
-		}
-	});
 
 	// Responsive map by resizing window
   google.maps.event.addDomListener(window, "resize", function() {
@@ -118,6 +111,17 @@ function initMap() {
       map.setCenter(center);
   });
 
+	// Set map after the geocode requests
+	map = new google.maps.Map(document.getElementById('map'), {
+		center: viewModel.locations()[0].location,
+		zoom: 5,
+		mapTypeControlOptions: {
+			position: google.maps.ControlPosition.LEFT_BOTTOM
+		}
+	});
+}
+
+function loadMap() {
 	// Set initial MARKERS to the map
 	// use marker.setMap(map) to add one marker
 	viewModel.locations().map(item => {
@@ -130,7 +134,7 @@ function initMap() {
 
 		let iW = new google.maps.InfoWindow({
 			id: item.id,
-			content: item.info,
+			content: item.info + '<div>' + item.address + '</div>',
 			position: m.position
 		});
 
@@ -150,4 +154,45 @@ function initMap() {
 
 	// Aplly bindings to Knockout as soon as map is loaded
 	ko.applyBindings(viewModel);
-}
+};
+
+// Get position and address info from geocoder
+const gCode = new Promise ((resolve, reject) => {
+	let resultsArray = [];
+	window.setTimeout(() => {
+		viewModel.locations().map(item => {
+			geocoder.geocode({'placeId' : item.placeid}, (results, status) => {
+				if (status === 'OK') {
+					console.log(results);
+					resultsArray.push(results);
+				} else {
+					window.alert('Geocoder failed due to: ' + status);
+					reject(Error(status));
+				}
+			});
+		});
+		resolve(resultsArray);
+	}, 1000);
+});
+
+
+// TODO: fix the damn promise info request
+var han,
+		hanT;
+gCode.then(results => {
+	console.log(results);
+	han = results;
+	viewModel.locations().map(item => {
+		hanT = item;
+		if (results[item.id] !== null) {
+			item.location.lat = results[item.id][0].geometry.location.lat();
+			item.location.lng = results[item.id][0].geometry.location.lng();
+			item.address = results[item.id][0].formatted_address;
+			return results;
+		} else {
+			window.alert('No results found');
+		}
+	})
+})
+.catch(err => console.log(err))
+.then(() => loadMap());
