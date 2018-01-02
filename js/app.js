@@ -17,6 +17,7 @@ const viewModel = {
 	menuPane: ko.observable(null),
 	locations: ko.observableArray(),
 	windowKo: ko.observable(window.innerWidth),
+	dataFetchErr: false,
 
 	toggleMenu: () => {
 		if (viewModel.menuPane() === null) {
@@ -28,7 +29,9 @@ const viewModel = {
 	setCenterMap: loc => { map.setCenter(loc); },
 	showInfoWindow: id => {
 		if (document.readyState !== 'complete') {
-			return window.alert('ERR: Content not loaded, please wait for loading or refresh the page.')
+			return window.alert('ERR: Content not loaded, please wait for loading or refresh the page.');
+		} else if (viewModel.dataFetchErr) {
+			return window.alert('ERR: Content not loaded, please refresh the page.');
 		}
 		let item = viewModel.locations()[id],
 				dataInfo = viewModel.locations()[id].fsContent.response.venue,
@@ -86,6 +89,10 @@ locs.map(l => viewModel.locations().push(l));
 
 		fetch('https://api.foursquare.com/v2/venues/' + i + '?ll=' + iLat + ',' + iLng + '&client_id=' + client_id + '&client_secret=' + client_secret + '&v=20200101')
 		.then(resolve => {
+			if (resolve.status !== 200) {
+				viewModel.dataFetchErr = true;
+				throw Error(resolve.status + ' ' + resolve.statusText);
+			}
 			resolve.json().then(data => {
 				console.log(data);
 
@@ -178,12 +185,14 @@ function initMap() {
 			position: google.maps.ControlPosition.LEFT_BOTTOM
 		}
 	});
-	
-	// Error handling when loading the map
-	map.onerror = () => window.alert("The map didn't load correctly. Please refresh your browser and try again.");
 
 	// Load map contents
 	loadMap();
+}
+
+// Error handling when loading the map
+function mapOnError() {
+	window.alert("The map didn't load correctly. Please refresh your browser and try again.");
 }
 
 function loadMap() {
