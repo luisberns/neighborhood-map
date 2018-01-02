@@ -77,6 +77,11 @@ html, body {
 	align-items: center;
 }
 
+#top-header h1 {
+	margin-left: 20px;
+	color: #ffffff;
+}
+
 #bottom-header {
 	height: 70%;
 	background: #2962FF;

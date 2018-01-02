@@ -10,7 +10,7 @@ const locs = [
 		{id: 2, title: "Fondation Café", placeid: "ChIJEfw8-gVu5kcRCoObsIY7C1I", fsId: "527e5b6f11d2c8ad2cf37a22", location: {lat: 48.86570700000001, lng: 2.3615029999999706}, address: "16 Rue Dupetit-Thouars, 75003 Paris, France"},
 		{id: 3, title: "Bagelstein", placeid: "ChIJswHuekdu5kcR6xgWWkc5aPc", fsId: "546dd0fc498e1597e843450f", location: {lat: 48.8770224, lng: 2.338313400000061}, address: "8 Rue Saint-Lazare, 75009 Paris, France"},
 		{id: 4, title: "CRAFT", placeid: "ChIJLeUyggtu5kcRNUgCe7GhauQ", fsId: "50420756e4b0047a41a495fc", location: {lat: 48.87322330000001, lng: 2.363122100000055}, address: "24 Rue des Vinaigriers, 75010 Paris, France"}
-]
+];
 
 const viewModel = {
 	query: ko.observable(''),
@@ -47,14 +47,14 @@ const viewModel = {
 			priceRange += dataInfo.price.currency;
 		}
 
-		infoWindow[id].setContent('<div class="iw-content"><h1>' + item.title + '</h1>' + photo + hours + rate + '  -  <strong>Price: </strong>' + priceRange + '  ' + priceMessage + address + foursquareLink + '</div>')
+		infoWindow[id].setContent('<div class="iw-content"><h1>' + item.title + '</h1>' + photo + hours + rate + '  -  <strong>Price: </strong>' + priceRange + '  ' + priceMessage + address + foursquareLink + '</div>');
 		infoWindow[id].open(map, markers[id]);
 	},
 	animateMarker: id => {
 		markers[id].setAnimation(google.maps.Animation.BOUNCE);
 		window.setTimeout(() => {
 			markers[id].setAnimation(null);
-		}, 1400)
+		}, 1400);
 	},
 	showMarkerWindow: (id, loc) => {
 		viewModel.setCenterMap(loc);
@@ -105,7 +105,7 @@ locs.map(l => viewModel.locations().push(l));
 
 // Check the viewport size to toggle menu on mobile
 if (viewModel.windowKo() <= 500) {
-	viewModel.toggleMenu()
+	viewModel.toggleMenu();
 }
 
 // Listen to the search input query and show the results
@@ -114,7 +114,7 @@ viewModel.searchList = ko.computed(() => {
 
 	if (!q) {
 		if (document.readyState === "complete") {
-			markers.map(m => { m.setMap(map); })
+			markers.map(m => { m.setMap(map); });
 		}
 		return viewModel.locations();
 	} else {
@@ -129,7 +129,7 @@ viewModel.filterMarkers = ko.computed(() => {
 	var m = viewModel.searchList();
 
 	if (!m) {
-		return
+		return;
 	} else {
 		if (document.readyState === "complete") {
 			for (let x = 0; x < markers.length; x++) {
@@ -204,7 +204,7 @@ function loadMap() {
 		// Populate MARKERS and INFOWINDOW arrays
 		markers.push(m);
 		infoWindow.push(iW);
-	})
+	});
 
 	// Add listener for open infoWindow and center map to marker on CLICK
 	markers.map(m => {
@@ -215,4 +215,4 @@ function loadMap() {
 
 	// Aplly bindings to Knockout as soon as map is loaded
 	ko.applyBindings(viewModel);
-};
+}
