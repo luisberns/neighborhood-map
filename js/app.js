@@ -195,7 +195,8 @@ function loadMap() {
 
 		let iW = new google.maps.InfoWindow({
 			id: item.id,
-			position: m.position
+			position: m.position,
+			maxWidth: 280
 		});
 
 		m.setMap(map);
