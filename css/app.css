@@ -55,14 +55,14 @@ html, body {
 	position: fixed;
 	transition: 2s ease-in-out;
 	z-index: 8;
-	padding: 1em 1vw;
+	padding: 10px;
 	box-sizing: border-box;
 }
 
 #top-header,
 #bottom-header,
 .list-text {
-	padding: 0 1.5vw;
+	padding: 0 20px;
 	box-sizing: border-box;
 }
 
@@ -84,18 +84,13 @@ html, body {
 	justify-content: space-around;
 }
 
-#search,
-#filter {
-	align-items: center;
-}
-
-#search input,
-#filter button {
+#search input {
 	max-height: 40px;
 }
 
 #search {
 	flex-grow: 1;
+	align-items: center;
 }
 
 #search input {
@@ -128,4 +123,18 @@ html, body {
 #map {
 	height: 100vh;
 	width: 100vw;
+}
+
+.iw-content {
+	font-family: monospace;
+	line-height: 1.5em;
+}
+
+.iw-img {
+	width: 250px;
+	height: 250px;
+}
+
+.iw-img img {
+	width: 100%;
 }

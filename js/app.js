@@ -5,15 +5,14 @@
 
 // APPLICATION MVVM HANDLERS
 const locs = [
-		{id: 0, title: "Hardware Société", placeid: "ChIJpZjaLl1u5kcR0yN4kIoECqw", fsId: "5710c77a498e3021c0641aa9", location: {lat: 48.8868764, lng: 2.344576800000027}, address: "10 Rue Lamarck, 75018 Paris, France", info: "<div>Some really nice text on the info window</div>"},
-		{id: 1, title: "La Caféothèque", placeid: "ChIJUZd-NP1x5kcRQhl91RYHxRs", fsId: "4bbb21a91261d13aa847eb98", location: {lat: 48.8544402, lng: 2.3557431000000406}, address: "52 Rue de l'Hôtel de ville, 75004 Paris, France", info: "<div>Some really nice text on the info window</div>"},
-		{id: 2, title: "Fondation Café", placeid: "ChIJEfw8-gVu5kcRCoObsIY7C1I", fsId: "527e5b6f11d2c8ad2cf37a22", location: {lat: 48.86570700000001, lng: 2.3615029999999706}, address: "16 Rue Dupetit-Thouars, 75003 Paris, France", info: "<div>Some really nice text on the info window</div>"},
-		{id: 3, title: "Bagelstein", placeid: "ChIJswHuekdu5kcR6xgWWkc5aPc", fsId: "546dd0fc498e1597e843450f", location: {lat: 48.8770224, lng: 2.338313400000061}, address: "8 Rue Saint-Lazare, 75009 Paris, France", info: "<div>Some really nice text on the info window</div>"},
-		{id: 4, title: "CRAFT", placeid: "ChIJLeUyggtu5kcRNUgCe7GhauQ", fsId: "50420756e4b0047a41a495fc", location: {lat: 48.87322330000001, lng: 2.363122100000055}, address: "24 Rue des Vinaigriers, 75010 Paris, France", info: "<div>Some really nice text on the info window</div>"}
+		{id: 0, title: "Hardware Société", placeid: "ChIJpZjaLl1u5kcR0yN4kIoECqw", fsId: "5710c77a498e3021c0641aa9", location: {lat: 48.8868764, lng: 2.344576800000027}, address: "10 Rue Lamarck, 75018 Paris, France"},
+		{id: 1, title: "La Caféothèque", placeid: "ChIJUZd-NP1x5kcRQhl91RYHxRs", fsId: "4bbb21a91261d13aa847eb98", location: {lat: 48.8544402, lng: 2.3557431000000406}, address: "52 Rue de l'Hôtel de ville, 75004 Paris, France"},
+		{id: 2, title: "Fondation Café", placeid: "ChIJEfw8-gVu5kcRCoObsIY7C1I", fsId: "527e5b6f11d2c8ad2cf37a22", location: {lat: 48.86570700000001, lng: 2.3615029999999706}, address: "16 Rue Dupetit-Thouars, 75003 Paris, France"},
+		{id: 3, title: "Bagelstein", placeid: "ChIJswHuekdu5kcR6xgWWkc5aPc", fsId: "546dd0fc498e1597e843450f", location: {lat: 48.8770224, lng: 2.338313400000061}, address: "8 Rue Saint-Lazare, 75009 Paris, France"},
+		{id: 4, title: "CRAFT", placeid: "ChIJLeUyggtu5kcRNUgCe7GhauQ", fsId: "50420756e4b0047a41a495fc", location: {lat: 48.87322330000001, lng: 2.363122100000055}, address: "24 Rue des Vinaigriers, 75010 Paris, France"}
 ]
 
 const viewModel = {
-	self: this,
 	query: ko.observable(''),
 	menuPane: ko.observable(null),
 	locations: ko.observableArray(),
@@ -28,12 +27,27 @@ const viewModel = {
 	},
 	setCenterMap: loc => { map.setCenter(loc); },
 	showInfoWindow: id => {
-		let item = viewModel.locations()[id];
+		let item = viewModel.locations()[id],
+				dataInfo = viewModel.locations()[id].fsContent.response.venue,
+				priceCount = dataInfo.price.tier,
+				priceRange = '',
+				photo = '<div class="iw-img"><img src="' + item.photo + '"></div>',
+				hours = '<div><strong>Hours: </strong>' + dataInfo.hours.status + '</div>',
+				rate = '<div><strong>Rate: </strong>' + dataInfo.rating,
+				priceMessage = dataInfo.price.message + '</div>',
+				address = '<div><strong>Address: </strong>' + item.address + '</div>',
+				foursquareLink = '<div><a href="' + dataInfo.canonicalUrl + '" target="_blank">Foursquare</a></div>',
+				twitterLink;
 
 		infoWindow.map(i => {
 			i.setMap(null);
 		});
-		infoWindow[id].setContent('<div>' + item.fsContent + '</div>' + item.info + '<div><strong>Address: </strong>' + item.address + '</div>')
+
+		for (let i = 0; i < dataInfo.price.tier; i++) {
+			priceRange += dataInfo.price.currency;
+		}
+
+		infoWindow[id].setContent('<div class="iw-content"><h1>' + item.title + '</h1>' + photo + hours + rate + '  -  <strong>Price: </strong>' + priceRange + '  ' + priceMessage + address + foursquareLink + '</div>')
 		infoWindow[id].open(map, markers[id]);
 	},
 	animateMarker: id => {
@@ -46,6 +60,9 @@ const viewModel = {
 		viewModel.setCenterMap(loc);
 		viewModel.showInfoWindow(id);
 		viewModel.animateMarker(id);
+		if (window.innerWidth <= 500) {
+			viewModel.menuPane("menu-close");
+		}
 	}
 };
 
@@ -55,31 +72,36 @@ locs.map(l => viewModel.locations().push(l));
 /*
  * Resquest Foursquare API data
  */
-function foursquareRequest() {
+(() => {
 	const client_id = 'O0R3FG5EKQ0JW4ND4DDLEBU11VOIKVNAKLTJPHY4M0A55S0Q',
 				client_secret = '1B44WB2ZAJZAU3X1ZFIZFMEXEJ2PVGCQWYWJNMTYQTYUJECF';
 
 	viewModel.locations().map(item => {
-		let i = item.fsId;
-		console.log(i);
-		fetch('https://api.foursquare.com/v2/venues/' + i + '?ll=' + viewModel.locations()[0].location.lat + ',' + viewModel.locations()[0].location.lng + '&client_id=' + client_id + '&client_secret=' + client_secret + '&v=20200101')
-		.then(resolve => {
-			console.dir(resolve);
+		let i = item.fsId,
+		 		iLat = viewModel.locations()[0].location.lat,
+				iLng = viewModel.locations()[0].location.lng;
 
+		fetch('https://api.foursquare.com/v2/venues/' + i + '?ll=' + iLat + ',' + iLng + '&client_id=' + client_id + '&client_secret=' + client_secret + '&v=20200101')
+		.then(resolve => {
 			resolve.json().then(data => {
 				console.log(data);
 
-				let h = data.response.venue.hours.status;
-				item.fsContent = h;
+				item.fsContent = data;
+
+				let i = item.fsContent.response.venue;
+
+				fetch(i.bestPhoto.prefix + '500x500' + i.bestPhoto.suffix).then(response => {
+					console.log(response);
+					return response.blob();
+				}).then(img => {
+					let objURL = URL.createObjectURL(img);
+					item.photo = objURL;
+					console.dir(item.photo);
+				}).catch(err => console.log(err));
 			});
-
-
-			console.log(item);
 		}).catch(err => console.log(err));
 	});
-};
-
-foursquareRequest();
+})();
 
 // Check the viewport size to toggle menu on mobile
 if (viewModel.windowKo() <= 500) {
@@ -131,7 +153,11 @@ window.addEventListener('resize', () => {
 var map,
 		geocoder,
 		markers = [],
-		infoWindow = [];
+		infoWindow = [],
+		mapRequestTimeout;
+
+// Error handling when loading the map
+mapRequestTimeout = setTimeout(() => $('#map').html("The map didn't load correctly. Please refresh your browser and try again."));
 
 // Initialize map on load
 function initMap() {
@@ -152,6 +178,7 @@ function initMap() {
 			position: google.maps.ControlPosition.LEFT_BOTTOM
 		}
 	});
+	clearTimeout(mapRequestTimeout);
 	loadMap();
 }
 
