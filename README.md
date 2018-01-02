@@ -4,7 +4,10 @@ Final project for Udacity's Front-end Developer Nanodegree.
 
 **Online Access:** [https://louisberns.github.io/neighborhood-map/](https://louisberns.github.io/neighborhood-map/)
 
-**Download:** `$ git clone https://github.com/louisberns/neighborhood-map.git`
+**Local Access:** 
+- Download - `$ git clone https://github.com/louisberns/neighborhood-map.git`
+- Go to folder - `$ cd neighborhood-map`
+- Open in browser - `index.html` (Google Chrome would be the best choice)
 ____
 
 ## Content

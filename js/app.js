@@ -27,6 +27,9 @@ const viewModel = {
 	},
 	setCenterMap: loc => { map.setCenter(loc); },
 	showInfoWindow: id => {
+		if (document.readyState !== 'complete') {
+			return window.alert('ERR: Content not loaded, please wait for loading or refresh the page.')
+		}
 		let item = viewModel.locations()[id],
 				dataInfo = viewModel.locations()[id].fsContent.response.venue,
 				priceCount = dataInfo.price.tier,
@@ -97,9 +100,9 @@ locs.map(l => viewModel.locations().push(l));
 					let objURL = URL.createObjectURL(img);
 					item.photo = objURL;
 					console.dir(item.photo);
-				}).catch(err => console.log(err));
+				}).catch(err => window.alert('Photo resquest from Foursquare API failed on image request. ERR: ' + err));
 			});
-		}).catch(err => console.log(err));
+		}).catch(err => window.alert('Photo resquest from Foursquare API failed on request data. ERR: ' + err));
 	});
 })();
 
@@ -151,13 +154,10 @@ window.addEventListener('resize', () => {
 
 // GOOGLE MAPS API
 var map,
-		geocoder,
-		markers = [],
-		infoWindow = [],
-		mapRequestTimeout;
-
-// Error handling when loading the map
-mapRequestTimeout = setTimeout(() => $('#map').html("The map didn't load correctly. Please refresh your browser and try again."));
+	geocoder,
+	markers = [],
+	infoWindow = [],
+	mapRequestTimeout;
 
 // Initialize map on load
 function initMap() {
@@ -178,7 +178,11 @@ function initMap() {
 			position: google.maps.ControlPosition.LEFT_BOTTOM
 		}
 	});
-	clearTimeout(mapRequestTimeout);
+	
+	// Error handling when loading the map
+	map.onerror = () => window.alert("The map didn't load correctly. Please refresh your browser and try again.");
+
+	// Load map contents
 	loadMap();
 }
 
